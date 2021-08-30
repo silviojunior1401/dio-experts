@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(value = "/product")
@@ -15,24 +18,28 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    @RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public Product create(@RequestBody Product product) {
         return productRepository.save(product);
     }
 
     @RequestMapping
-    public Iterable<Product> list() {
-        return productRepository.findAll();
+    public List<Product> list() {
+        return StreamSupport
+                .stream(productRepository.findAll().spliterator(), false)
+                .collect(Collectors.toList());
     }
 
-    @RequestMapping(value = "/{id}")
-    public Optional<Product> findById(@PathVariable("id") Integer id) {
-        return productRepository.findById(id);
+    @RequestMapping("/{id}")
+    public Product findById(@PathVariable("id") Integer id) {
+        return productRepository.findById(id).orElse(new Product());
     }
 
-    @RequestMapping(value = "/name/{name}")
-    public Iterable<Product> findByName(@PathVariable("name") String name) {
-        return productRepository.findByName(name);
+    @RequestMapping("/name/{name}")
+    public List<Product> findByName(@PathVariable("name") String name) {
+        return StreamSupport
+                .stream(productRepository.findByName(name).spliterator(), false)
+                .collect(Collectors.toList());
     }
 
 }
